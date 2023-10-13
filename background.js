@@ -13,23 +13,5 @@ chrome.action.onClicked.addListener(async (tab) => {
     text: nextState,
   });
 
-  if (nextState === "ON") {
-    chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      function: (message) => {
-        // Enviar a mensagem "ON" para o script na página
-        window.postMessage({ type: "extension-state", message }, "*");
-      },
-      args: ["ON"],
-    });
-  } else if (nextState === "OFF") {
-    chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      function: (message) => {
-        // Enviar a mensagem "OFF" para o script na página
-        window.postMessage({ type: "extension-state", message }, "*");
-      },
-      args: ["OFF"],
-    });
-  }
+  await chrome.tabs.sendMessage(tab.id, { state: nextState });
 });

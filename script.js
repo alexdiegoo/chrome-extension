@@ -2,17 +2,19 @@ async function getElement(e) {
   alert("Elemento clicado! " + e.target.tagName);
 }
 
-// Função para lidar com mensagens da extensão
-const handleMessage = (event) => {
-  if (event.data.type === "extension-state" && event.data.message === "OFF") {
-    alert("Extensão desativada");
-    document.removeEventListener("click", getElement);
-  }
-
-  if (event.data.type === "extension-state" && event.data.message === "ON") {
+chrome.runtime.onMessage.addListener(async function (
+  request,
+  sender,
+  sendResponse
+) {
+  if (request.state === "ON") {
+    alert("Extensão ativada!");
     document.addEventListener("click", getElement);
   }
-};
 
-// Adicione um ouvinte de eventos para mensagens da extensão
-window.addEventListener("message", handleMessage);
+  if (request.state === "OFF") {
+    alert("Extensão desativada!");
+
+    document.removeEventListener("click", getElement);
+  }
+});
