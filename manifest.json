@@ -26,5 +26,13 @@
       "128": "images/icon-128.png"
     }
   },
-  "permissions": ["activeTab", "scripting", "storage"]
+  "commands": {
+    "generate-script": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+H"
+      },
+      "description": "Gerar script para a página"
+    }
+  },
+  "permissions": ["activeTab", "scripting", "storage", "commands"]
 }
