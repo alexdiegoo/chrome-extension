@@ -15,3 +15,7 @@ chrome.action.onClicked.addListener(async (tab) => {
 
   await chrome.tabs.sendMessage(tab.id, { state: nextState });
 });
+
+chrome.storage.onChanged.addListener((changes, namespace) => {
+  console.log(changes.elements.newValue);
+});
