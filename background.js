@@ -28,44 +28,76 @@ chrome.commands.onCommand.addListener(async (command) => {
 });
 
 function generateScript(elements) {
-  let script = ``;
+  let script = `
+    var __urlLink = "sua url aqui";
+  `;
   elements.forEach((element, index) => {
-    script += `const element${index} = document.querySelector("${generateQuery(
+    script += `var __element${index} = document.querySelectorAll("${generateQuery(
       element
-    )}")`;
+    )}")
+    `;
 
-    if (element.tag === "A") {
-      script += `
-        var links = document.getElementsByTagName("a");
-        for (var i = 0, n = links.length; i < n; i++) {
-          if (links[i].href.includes(element${index}.href)) {
-          var href = links[i].href.replace(/#/g, "");
+    switch (element.tag) {
+      case "A":
+        script += `
+        var __links = document.getElementsByTagName("a");
+        for (var k = 0; k < __links.length; k++) {
+          if (__links[k].href.includes(__urlLink)) {
+          var href = __links[k].href;
           href =
             href.trim() +
             (href.indexOf("?") > 0 ? "&" : "?") +
             document.location.search.replace("?", "").toString();
-          links[i].href = href;
+          __links[k].href = href;
           }
         }
-      `;
-    } else if (element.tag === "BUTTON") {
-      script += `
-        element${index}.addEventListener("submit", () => {
-          const params = window.location.search;
-          const URL = "cole a sua url aqui";
+        `;
+        break;
+      case "BUTTON":
+        script += `
+        for(var k = 0; k < __element${index}.length; k++) {
+           if(__element${index}[k].type === "submit") {
+            var __formElement = document.querySelector("form")
+            __formElement.onsubmit =  (e) => {
+              e.preventDefault();
 
-          window.location.href = URL + params;
-        });
-      `;
-    } else {
-      script += `
-        element${index}.addEventListener("click", () => {
-          const params = window.location.search;
-          const URL = "cole a sua url aqui";
+            __urlLink =
+              __urlLink.trim() +
+              (__urlLink.indexOf("?") > 0 ? "&" : "?") +
+              document.location.search.replace("?", "").toString();
 
-          window.location.href = URL + params;
-        });
-      `;
+            window.location.href = __urlLink;
+          };
+          } else {
+            __element${index}[k].addEventListener("click", (e) => {
+              e.preventDefault();
+          
+              __urlLink =
+                __urlLink.trim() +
+                (__urlLink.indexOf("?") > 0 ? "&" : "?") +
+                document.location.search.replace("?", "").toString();
+
+              window.location.href = __urlLink;
+            });
+          }
+        }
+        `;
+        break;
+      default:
+        script += `
+        for(var k = 0; k < __element${index}.length; k++) {
+          __element${index}[k].addEventListener("click", (e) => {
+            e.preventDefault();
+
+            __urlLink =
+              __urlLink.trim() +
+              (__urlLink.indexOf("?") > 0 ? "&" : "?") +
+              document.location.search.replace("?", "").toString();
+
+            window.location.href = __urlLink;
+          });
+        }
+         `;
     }
   });
 
