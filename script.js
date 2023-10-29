@@ -48,14 +48,35 @@ chrome.runtime.onMessage.addListener(async function (
   }
 });
 
-function handleClick(event) {
+async function handleClick(event) {
   if (event === "select-elements") {
     alert("Selecione os botões que levam para a próxima página.");
     document.addEventListener("click", getElement);
   }
 
   if (event === "generate-script") {
-    alert("Gerar Script");
+    const nemuExtension = document.querySelector("#nemu-extension").shadowRoot;
+    const url = nemuExtension.querySelector("#nemu-input").value;
+
+    if (url === "") {
+      alert("Por favor, insira a URL no campo indicado.");
+      return;
+    }
+
+    await chrome.runtime.sendMessage({
+      message: "generate-script",
+    });
+
+    setTimeout(async () => {
+      const storageScript = await chrome.storage.local.get(["script"]);
+
+      const script = `&lt;script&gt;
+      var __urlLink = "${url}";
+    ${storageScript.script}
+&lt;/script&gt;`;
+
+      nemuExtension.querySelector("#nemu-code").innerHTML = script;
+    }, 3000);
   }
 }
 
@@ -185,10 +206,8 @@ function showInterface() {
 
       <div id="nemu-script">
         <pre>
-        <code>
-&lt;script&gt;
+        <code id="nemu-code">
 
-&lt;/script&gt;
         </code>
     </pre>
       </div>

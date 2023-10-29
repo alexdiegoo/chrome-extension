@@ -27,19 +27,26 @@ chrome.commands.onCommand.addListener(async (command) => {
   }
 });
 
+chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
+  if (request.message === "generate-script") {
+    const { elements } = await chrome.storage.local.get(["elements"]);
+    const script = await generateScript(elements);
+    await chrome.storage.local.set({ script });
+  }
+});
+
 function generateScript(elements) {
-  let script = `
-    var __urlLink = "sua url aqui";
-  `;
-  elements.forEach((element, index) => {
-    script += `var __element${index} = document.querySelectorAll("${generateQuery(
-      element
-    )}")
+  return new Promise((resolve, reject) => {
+    let script = ``;
+    elements.forEach((element, index) => {
+      script += `var __element${index} = document.querySelectorAll("${generateQuery(
+        element
+      )}")
     `;
 
-    switch (element.tag) {
-      case "A":
-        script += `
+      switch (element.tag) {
+        case "A":
+          script += `
         var __links = document.getElementsByTagName("a");
         for (var k = 0; k < __links.length; k++) {
           if (__links[k].href.includes(__urlLink)) {
@@ -52,9 +59,9 @@ function generateScript(elements) {
           }
         }
         `;
-        break;
-      case "BUTTON":
-        script += `
+          break;
+        case "BUTTON":
+          script += `
         for(var k = 0; k < __element${index}.length; k++) {
            if(__element${index}[k].type === "submit") {
             var __formElement = document.querySelector("form")
@@ -82,9 +89,9 @@ function generateScript(elements) {
           }
         }
         `;
-        break;
-      default:
-        script += `
+          break;
+        default:
+          script += `
         for(var k = 0; k < __element${index}.length; k++) {
           __element${index}[k].addEventListener("click", (e) => {
             e.preventDefault();
@@ -98,10 +105,11 @@ function generateScript(elements) {
           });
         }
          `;
-    }
-  });
+      }
+    });
 
-  console.log(script);
+    resolve(script);
+  });
 }
 
 function generateQuery(element) {
