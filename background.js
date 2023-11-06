@@ -38,64 +38,51 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 function generateScript(elements) {
   return new Promise((resolve, reject) => {
     let script = ``;
+    let firstElementA = true;
     elements.forEach((element, index) => {
-      script += `var __element${index} = document.querySelectorAll("${generateQuery(
+      script += `  var __element${index} = document.querySelectorAll("${generateQuery(
         element
       )}")
     `;
 
       switch (element.tag) {
         case "A":
+          if (!firstElementA) break;
           script += `
-        var __links = document.getElementsByTagName("a");
-        for (var k = 0; k < __links.length; k++) {
-          if (__links[k].href.includes(__urlLink)) {
-          var href = __links[k].href;
-          href =
-            href.trim() +
-            (href.indexOf("?") > 0 ? "&" : "?") +
-            document.location.search.replace("?", "").toString();
-          __links[k].href = href;
-          }
+      var __links = document.getElementsByTagName("a");
+      for (var k = 0; k < __links.length; k++) {
+        if (__links[k].href.includes(__urlLink)) {
+        var href = __links[k].href;
+        href =
+          href.trim() +
+          (href.indexOf("?") > 0 ? "&" : "?") +
+          document.location.search.replace("?", "").toString();
+        __links[k].href = href;
         }
+      }
         `;
+          firstElementA = false;
           break;
         case "BUTTON":
           script += `
-        for(var k = 0; k < __element${index}.length; k++) {
-           if(__element${index}[k].type === "submit") {
-            var __formElement = document.querySelector("form")
-            __formElement.onsubmit =  (e) => {
-              e.preventDefault();
-
-            __urlLink =
-              __urlLink.trim() +
-              (__urlLink.indexOf("?") > 0 ? "&" : "?") +
-              document.location.search.replace("?", "").toString();
-
-            window.location.href = __urlLink;
-          };
-          } else {
-            __element${index}[k].addEventListener("click", (e) => {
-              e.preventDefault();
+        var __formElement = document.querySelector("form")
+      for(var k = 0; k < __element${index}.length; k++) {
+          if(__element${index}[k].type === "submit" && __formElement) {
           
-              __urlLink =
-                __urlLink.trim() +
-                (__urlLink.indexOf("?") > 0 ? "&" : "?") +
-                document.location.search.replace("?", "").toString();
-
-              window.location.href = __urlLink;
-            });
-          }
-        }
-        `;
-          break;
-        default:
-          script += `
-        for(var k = 0; k < __element${index}.length; k++) {
-          __element${index}[k].addEventListener("click", (e) => {
+          __formElement.onsubmit =  (e) => {
             e.preventDefault();
 
+          __urlLink =
+            __urlLink.trim() +
+            (__urlLink.indexOf("?") > 0 ? "&" : "?") +
+            document.location.search.replace("?", "").toString();
+
+          window.location.href = __urlLink;
+        };
+        } else {
+          __element${index}[k].addEventListener("click", (e) => {
+            e.preventDefault();
+        
             __urlLink =
               __urlLink.trim() +
               (__urlLink.indexOf("?") > 0 ? "&" : "?") +
@@ -104,7 +91,23 @@ function generateScript(elements) {
             window.location.href = __urlLink;
           });
         }
-         `;
+      }
+        `;
+          break;
+        default:
+          script += `
+      for(var k = 0; k < __element${index}.length; k++) {
+        __element${index}[k].addEventListener("click", (e) => {
+          e.preventDefault();
+
+          __urlLink =
+            __urlLink.trim() +
+            (__urlLink.indexOf("?") > 0 ? "&" : "?") +
+            document.location.search.replace("?", "").toString();
+
+          window.location.href = __urlLink;
+        });
+      }`;
       }
     });
 

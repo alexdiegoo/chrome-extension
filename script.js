@@ -70,9 +70,12 @@ async function handleClick(event) {
     setTimeout(async () => {
       const storageScript = await chrome.storage.local.get(["script"]);
 
-      const script = `&lt;script&gt;
-      var __urlLink = "${url}";
-    ${storageScript.script}
+      const script = `
+&lt;script&gt;
+  window.onload = function() {
+  var __urlLink = "${url}";
+${storageScript.script}
+      }
 &lt;/script&gt;`;
 
       nemuExtension.querySelector("#nemu-code").innerHTML = script;
@@ -116,7 +119,7 @@ function showInterface() {
 
      #nemu-extension {
       animation: slideRight 0.5s ease forwards;
-      z-index: 100;
+      z-index: 99999999;
       position: fixed;
       top: 20px;
       right: 20px;
