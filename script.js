@@ -67,6 +67,9 @@ async function handleClick(event) {
       message: "generate-script",
     });
 
+    nemuExtension.querySelector("#nemu-code").innerHTML = "";
+    nemuExtension.querySelector("#nemu-loading").classList.remove("hidden");
+
     setTimeout(async () => {
       const storageScript = await chrome.storage.local.get(["script"]);
 
@@ -78,8 +81,9 @@ ${storageScript.script}
       }
 &lt;/script&gt;`;
 
+      nemuExtension.querySelector("#nemu-loading").classList.add("hidden");
       nemuExtension.querySelector("#nemu-code").innerHTML = script;
-    }, 3000);
+    }, 1000);
   }
 }
 
@@ -190,6 +194,72 @@ function showInterface() {
       font-weight: 700;
     }
 
+    #nemu-loading {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+
+    #nemu-loading.hidden {
+      display: none;
+    }
+
+    .lds-ellipsis {
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+.lds-ellipsis div {
+  position: absolute;
+  top: 33px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fff;
+  animation-timing-function: cubic-bezier(0, 1, 1, 0);
+}
+.lds-ellipsis div:nth-child(1) {
+  left: 8px;
+  animation: lds-ellipsis1 0.6s infinite;
+}
+.lds-ellipsis div:nth-child(2) {
+  left: 8px;
+  animation: lds-ellipsis2 0.6s infinite;
+}
+.lds-ellipsis div:nth-child(3) {
+  left: 32px;
+  animation: lds-ellipsis2 0.6s infinite;
+}
+.lds-ellipsis div:nth-child(4) {
+  left: 56px;
+  animation: lds-ellipsis3 0.6s infinite;
+}
+@keyframes lds-ellipsis1 {
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes lds-ellipsis3 {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0);
+  }
+}
+@keyframes lds-ellipsis2 {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(24px, 0);
+  }
+}
+
     </style>
   </head>
   <body>
@@ -206,7 +276,10 @@ function showInterface() {
         <button class="nemu-button" id="nemu-select-elements-button">Selecionar Elementos</button>
         <button class="nemu-button" id="nemu-generate-script-button">Gerar Script</button>
       </div>
-
+      <div id="nemu-loading" class="hidden">
+      <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+      </div>
+      
       <div id="nemu-script">
         <pre>
         <code id="nemu-code">
