@@ -177,12 +177,12 @@ async function showInterface() {
     }
 
     #nemu-generate-script-button {
-      background-color: #5b21b6;
+      background-color: #4f46e5;
       margin-top: 8px;
     }
 
     #nemu-select-elements-button {
-      border: 1px solid #5b21b6;
+      border: 1px solid #4f46e5;
       background: none;
     }
 
