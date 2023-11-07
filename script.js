@@ -48,14 +48,42 @@ chrome.runtime.onMessage.addListener(async function (
   }
 });
 
-function handleClick(event) {
+async function handleClick(event) {
   if (event === "select-elements") {
     alert("Selecione os botões que levam para a próxima página.");
     document.addEventListener("click", getElement);
   }
 
   if (event === "generate-script") {
-    alert("Gerar Script");
+    const nemuExtension = document.querySelector("#nemu-extension").shadowRoot;
+    const url = nemuExtension.querySelector("#nemu-input").value;
+
+    if (url === "") {
+      alert("Por favor, insira a URL no campo indicado.");
+      return;
+    }
+
+    await chrome.runtime.sendMessage({
+      message: "generate-script",
+    });
+
+    nemuExtension.querySelector("#nemu-code").innerHTML = "";
+    nemuExtension.querySelector("#nemu-loading").classList.remove("hidden");
+
+    setTimeout(async () => {
+      const storageScript = await chrome.storage.local.get(["script"]);
+
+      const script = `
+&lt;script&gt;
+  window.onload = function() {
+  var __urlLink = "${url}";
+${storageScript.script}
+      }
+&lt;/script&gt;`;
+
+      nemuExtension.querySelector("#nemu-loading").classList.add("hidden");
+      nemuExtension.querySelector("#nemu-code").innerHTML = script;
+    }, 1000);
   }
 }
 
@@ -95,7 +123,7 @@ function showInterface() {
 
      #nemu-extension {
       animation: slideRight 0.5s ease forwards;
-      z-index: 100;
+      z-index: 99999999;
       position: fixed;
       top: 20px;
       right: 20px;
@@ -166,6 +194,72 @@ function showInterface() {
       font-weight: 700;
     }
 
+    #nemu-loading {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+
+    #nemu-loading.hidden {
+      display: none;
+    }
+
+    .lds-ellipsis {
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+.lds-ellipsis div {
+  position: absolute;
+  top: 33px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fff;
+  animation-timing-function: cubic-bezier(0, 1, 1, 0);
+}
+.lds-ellipsis div:nth-child(1) {
+  left: 8px;
+  animation: lds-ellipsis1 0.6s infinite;
+}
+.lds-ellipsis div:nth-child(2) {
+  left: 8px;
+  animation: lds-ellipsis2 0.6s infinite;
+}
+.lds-ellipsis div:nth-child(3) {
+  left: 32px;
+  animation: lds-ellipsis2 0.6s infinite;
+}
+.lds-ellipsis div:nth-child(4) {
+  left: 56px;
+  animation: lds-ellipsis3 0.6s infinite;
+}
+@keyframes lds-ellipsis1 {
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes lds-ellipsis3 {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0);
+  }
+}
+@keyframes lds-ellipsis2 {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(24px, 0);
+  }
+}
+
     </style>
   </head>
   <body>
@@ -182,13 +276,14 @@ function showInterface() {
         <button class="nemu-button" id="nemu-select-elements-button">Selecionar Elementos</button>
         <button class="nemu-button" id="nemu-generate-script-button">Gerar Script</button>
       </div>
-
+      <div id="nemu-loading" class="hidden">
+      <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+      </div>
+      
       <div id="nemu-script">
         <pre>
-        <code>
-&lt;script&gt;
+        <code id="nemu-code">
 
-&lt;/script&gt;
         </code>
     </pre>
       </div>
