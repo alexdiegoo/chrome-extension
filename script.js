@@ -87,13 +87,15 @@ ${storageScript.script}
   }
 }
 
-function showInterface() {
+async function showInterface() {
   const interface = document.createElement("div");
   interface.setAttribute("id", "nemu-extension");
 
   const shadowRoot = interface.attachShadow({ mode: "open" });
 
   const html = document.createElement("html");
+
+  const imagePath = await chrome.runtime.getURL("./images/logo-nemu-2.png");
 
   html.innerHTML = `
    <head>
@@ -265,7 +267,7 @@ function showInterface() {
   <body>
     <div id="nemu-extension">
       <div class="nemu-logo">
-        <img src="https://app.nemu.com.br/static/media/logo-nemu-2.fb092989ff963fe1349c.png" />
+        <img src=${imagePath} />
       </div>
 
       <div class="input-group">

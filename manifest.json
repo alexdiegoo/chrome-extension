@@ -34,5 +34,11 @@
       "description": "Gerar script para a página"
     }
   },
-  "permissions": ["activeTab", "scripting", "storage", "commands"]
+  "permissions": ["activeTab", "scripting", "storage", "commands"],
+  "web_accessible_resources": [
+    {
+      "resources": ["/images/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }
